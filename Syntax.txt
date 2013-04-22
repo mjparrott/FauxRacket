@@ -1,0 +1,6 @@
+program = exp
+exp = (+ exp exp)
+    | (* exp exp)
+    | (- exp exp)
+    | (/ exp exp)
+    | nat
