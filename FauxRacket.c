@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/* parse: Take an s-expression representation of a program and convert it
+          to an AST (abstract syntax tree)
+ */
 struct exp *parse( struct node *prog )
 {
 	if( prog->tag == LST )
@@ -13,7 +16,10 @@ struct exp *parse( struct node *prog )
 		struct exp *sexp = malloc( sizeof( struct exp ) );
 		if( sexp == NULL )
 		{
+			printf( "Error: out of memory\n" );
+			abort();
 		}
+		
 		sexp->type = NUMBER;
 		sexp->e.n = prog->num;
 		return sexp;
@@ -28,6 +34,8 @@ struct exp *parse( struct node *prog )
 			struct exp *fin = malloc( sizeof( struct exp ) );
 			if( fin == NULL )
 			{
+				printf( "Error: out of memory\n" );
+				abort();
 			}
 			
 			fin->type = BIN;
@@ -37,10 +45,19 @@ struct exp *parse( struct node *prog )
 	}
 }
 
+/* interp_loop: Take an AST and reduce it to a FauxRacket value
+ */
 int interp_loop( struct exp *prog )
 {
+	//Initial continuation of interpreter is empty
 	struct continuation *k = malloc( sizeof( struct continuation ) );
+	if( k == NULL )
+	{
+		printf( "Error: out of memory\n" );
+		abort();
+	}
 	k->type = K_MT;
+	//Possible interpreter states
 	enum { INTERP, APPLY_CONT, QUIT } state = INTERP;
 	int val = 0; //Meaningless initiailization value, shouldn't be relevant
 	
@@ -79,7 +96,7 @@ int interp_loop( struct exp *prog )
 				struct continuation *newk = malloc( sizeof( struct continuation ) );
 				if( newk == NULL )
 				{
-					printf( "Error: out of memory" );
+					printf( "Error: out of memory\n" );
 					abort();
 				}
 				newk->type = K_BINR;
@@ -91,7 +108,6 @@ int interp_loop( struct exp *prog )
 			}
 			else if( k->type == K_BINR )
 			{
-				//TODO: free memory (?)
 				struct continuation *temp = k;
 				
 				if( k->k.binR.op == ADDITION )
@@ -121,7 +137,9 @@ int interp_loop( struct exp *prog )
 	return val;
 }
 
-//Think about making this return an enum value to make it clearer
+/* convert_to_bin_type: convert a character binary operator to the correct
+                        enumeration type
+ */
 int convert_to_bin_type( char s )
 {
 	if( s == '+' )

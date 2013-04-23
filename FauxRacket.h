@@ -51,8 +51,8 @@ struct continuation
 	} k;
 };
 
-int interp_loop( struct exp *prog );
-int convert_to_bin_type( char s );
 struct exp *parse( struct node *prog );
+int convert_to_bin_type( char s );
+int interp_loop( struct exp *prog );
 
 #endif

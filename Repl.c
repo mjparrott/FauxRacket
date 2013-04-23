@@ -1,6 +1,6 @@
 /* Implement a REPL for Faux Racket
 
-For current syntax implemented, see syntax.txt
+For current syntax implemented, see Syntax.txt
 */
 #include <stdio.h>
 #include <stdlib.h>

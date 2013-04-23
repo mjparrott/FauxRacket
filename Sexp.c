@@ -1,3 +1,8 @@
+/* S-expression reading code courtesy of Prabhakar Ragde, Professor at the
+   University of Waterloo.
+   From C Learning Materials, from the course CS146
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,14 +10,14 @@
 #include "Sexp.h"
 #include "Helper.h"
 
-
-//Functions
+/* read_token: Read an S-expression token
+ */
 struct token read_token()
 {
 	struct token t;
 	skip_whitespace();
 	int c = getchar();
-	if( c == EOF)
+	if( c == EOF )
 	{
 		t.tag = TEOF;
 	}
@@ -42,6 +47,8 @@ struct token read_token()
 	return t;
 }
 
+/* read_nat: Read a natural number, starting with the digit c
+ */
 int read_nat( int c )
 {
 	int ans = c - '0';
@@ -53,6 +60,8 @@ int read_nat( int c )
 	return ans;
 }
 
+/* read_id: Read a symbol, starting with the character c
+ */
 char *read_id( int c )
 {
 	char buf[100], *newstr;
@@ -74,6 +83,12 @@ char *read_id( int c )
 	}
 }
 
+/* miread: Read an s-expression into a node structure
+   Supported list elements:
+   -List
+   -Natural numbers
+   -Symbols
+ */
 struct node *miread()
 {
 	struct token t;
@@ -107,6 +122,9 @@ struct node *miread()
 	}
 }
 
+
+/* token_to_node: Convert a token structure into a node structure
+ */
 struct node *token_to_node( struct token t )
 {
 	struct node *newn;
@@ -131,6 +149,8 @@ struct node *token_to_node( struct token t )
 	return newn;
 }
 
+/* read_list: Read a list into a node structure
+ */
 struct node *read_list()
 {
 	struct token t;
