@@ -9,6 +9,12 @@
  */
 struct exp *parse( struct node *prog )
 {
+	if( prog == NULL )
+	{
+		printf( "Error parsing\n" );
+		abort();
+	}
+	
 	if( prog->tag == LST )
 		return parse( prog->sublst );
 	else if( prog->tag == NUM )
@@ -40,6 +46,22 @@ struct exp *parse( struct node *prog )
 			
 			fin->type = BIN;
 			fin->e.b = (struct bin){ prog->str[0], exp1, exp2 };
+			return fin;
+		}
+		else if( strcmp( prog->str, "ifzero" ) == 0 )
+		{
+			struct exp *test = parse( prog->rest );
+			struct exp *texp = parse( prog->rest->rest );
+			struct exp *fexp = parse( prog->rest->rest->rest );
+			struct exp *fin = malloc( sizeof( struct exp ) );
+			if( fin == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			
+			fin->type = IFZERO;
+			fin->e.ifz = (struct ifzero){ test, texp, fexp };
 			return fin;
 		}
 	}
@@ -75,8 +97,24 @@ int interp_loop( struct exp *prog )
 				}
 			
 				newk->type = K_BINL;
-				newk->k.binL = (struct k_binL){ convert_to_bin_type( prog->e.b.op ), k, prog->e.b.right };
+				newk->k.binL = (struct k_binL){ .op = convert_to_bin_type( prog->e.b.op ), 
+							.cont = k, .rest = prog->e.b.right };
 				prog = prog->e.b.left;
+				k = newk;
+			}
+			else if( prog->type == IFZERO )
+			{
+				struct continuation *newk = malloc( sizeof( struct continuation ) );
+				if( newk == NULL )
+				{
+					printf( "Error: out of memory\n" );
+					abort();
+				}
+				
+				newk->type = K_IFZERO;
+				newk->k.ifzero = (struct k_ifzero){ .texp = prog->e.ifz.texp,
+							.fexp = prog->e.ifz.fexp, .cont = k };
+				prog = prog->e.ifz.test;
 				k = newk;
 			}
 			else if( prog->type == NUMBER )
@@ -100,9 +138,11 @@ int interp_loop( struct exp *prog )
 					abort();
 				}
 				newk->type = K_BINR;
-				newk->k.binR = (struct k_binR){ k->k.binL.op, k->k.binL.cont, val };
+				newk->k.binR = (struct k_binR){ .op = k->k.binL.op,
+							.cont = k->k.binL.cont, .val = val };
 				
 				prog = k->k.binL.rest;
+				free(k);
 				k = newk;
 				state = INTERP;
 			}
@@ -129,6 +169,23 @@ int interp_loop( struct exp *prog )
 				
 				k = k->k.binR.cont;
 				free(temp);
+			}
+			else if( k->type == K_IFZERO )
+			{
+				struct contination *temp = k;
+				
+				if( val == 0 )
+				{
+					prog = k->k.ifzero.texp;
+				}
+				else
+				{
+					prog = k->k.ifzero.fexp;
+				}
+				
+				k = k->k.ifzero.cont;
+				free(temp);
+				state = INTERP;
 			}
 		}
 	}

@@ -3,4 +3,5 @@ exp = (+ exp exp)
     | (* exp exp)
     | (- exp exp)
     | (/ exp exp)
+    | (ifzero exp exp exp)
     | nat

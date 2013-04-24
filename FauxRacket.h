@@ -10,12 +10,19 @@ struct bin
 	struct exp *left;
 	struct exp *right;
 };
+struct ifzero
+{
+	struct exp *test;
+	struct exp *texp;
+	struct exp *fexp;
+};
 struct exp
 {
-	enum { BIN, NUMBER } type;
+	enum { BIN, IFZERO, NUMBER } type;
 	union
 	{
 		struct bin b;
+		struct ifzero ifz;
 		int n;
 	} e;
 };
@@ -40,14 +47,21 @@ struct k_binR
 	struct continuation *cont;
 	int val;
 };
+struct k_ifzero
+{
+	struct exp *texp;
+	struct exp *fexp;
+	struct continuation *cont
+};
 struct continuation
 {
-	enum { K_MT, K_BINL, K_BINR } type;
+	enum { K_MT, K_BINL, K_BINR, K_IFZERO } type;
 	union
 	{
 		struct k_mt mt;
 		struct k_binL binL;
 		struct k_binR binR;
+		struct k_ifzero ifzero;
 	} k;
 };
 
