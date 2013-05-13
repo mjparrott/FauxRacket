@@ -32,7 +32,40 @@ struct exp *parse( struct node *prog )
 	}
 	else if( prog->tag == NAME )
 	{
-		if( strcmp( prog->str, "+" ) == 0 || strcmp( prog->str, "-" ) == 0
+		//(fun (id) exp)
+		if( strcmp( prog->str, "fun" ) == 0 )
+		{
+			struct exp *sexp = malloc( sizeof( struct exp ) );
+			if( sexp == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			
+			char* id = prog->rest->sublst->str; //TODO: error checking
+			struct exp *body = parse( prog->rest->rest );
+			struct fun func = (struct fun){ .id = id, .body = body };
+			sexp->type = FUN;
+			sexp->e.f = func;
+			return sexp;
+		}
+		//(exp exp)
+		else if( prog->tag == LST && prog->rest != NULL )
+		{
+			struct exp *sexp = malloc( sizeof( struct exp ) );
+			if( sexp == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			
+			struct exp *func = parse( prog->sublst );
+			struct exp *arg = parse( prog->rest );
+			sexp->type = APP;
+			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
+			return sexp;
+		}
+		else if( strcmp( prog->str, "+" ) == 0 || strcmp( prog->str, "-" ) == 0
 		|| strcmp( prog->str, "*" ) == 0 || strcmp( prog->str, "/" ) == 0 )
 		{
 			struct exp *exp1 = parse( prog->rest );
@@ -116,6 +149,12 @@ int interp_loop( struct exp *prog )
 							.fexp = prog->e.ifz.fexp, .cont = k };
 				prog = prog->e.ifz.test;
 				k = newk;
+			}
+			else if( prog->type == FUN )
+			{
+			}
+			else if( prog->type == APP )
+			{
 			}
 			else if( prog->type == NUMBER )
 			{

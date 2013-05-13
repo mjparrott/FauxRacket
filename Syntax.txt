@@ -4,4 +4,6 @@ exp = (+ exp exp)
     | (- exp exp)
     | (/ exp exp)
     | (ifzero exp exp exp)
+    | (exp exp)
+    | (fun (id) exp)
     | nat

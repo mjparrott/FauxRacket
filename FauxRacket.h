@@ -16,13 +16,25 @@ struct ifzero
 	struct exp *texp;
 	struct exp *fexp;
 };
+struct fun
+{
+	char* id;
+	struct exp *body;
+};
+struct app
+{
+	struct exp *func;
+	struct exp *arg;
+};
 struct exp
 {
-	enum { BIN, IFZERO, NUMBER } type;
+	enum { BIN, IFZERO, FUN, APP, NUMBER } type;
 	union
 	{
 		struct bin b;
 		struct ifzero ifz;
+		struct fun f;
+		struct app funApp;
 		int n;
 	} e;
 };
@@ -51,7 +63,7 @@ struct k_ifzero
 {
 	struct exp *texp;
 	struct exp *fexp;
-	struct continuation *cont
+	struct continuation *cont;
 };
 struct continuation
 {
