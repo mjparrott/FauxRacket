@@ -43,7 +43,7 @@ struct exp
 //Binary operations
 enum Operation { ADDITION, MULTIPLICATION, SUBTRACTION, DIVISION };
 
-//Continuation structures for inte
+//Continuation structures for interpreter
 struct k_mt
 {
 };
@@ -75,6 +75,17 @@ struct continuation
 		struct k_binR binR;
 		struct k_ifzero ifzero;
 	} k;
+};
+
+//Definition of a FauxRacket value
+struct FRVal
+{
+	enum { FR_NUMBER, FR_FUNCTION };
+	union
+	{
+		int n;
+		struct fun f; //TODO: should this be a closure?
+	};
 };
 
 struct exp *parse( struct node *prog );
