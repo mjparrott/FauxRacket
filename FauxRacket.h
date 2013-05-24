@@ -39,6 +39,13 @@ struct exp
 	} e;
 };
 
+//Interpreter structures
+struct closure
+{
+   char* param;
+   struct exp *body;
+   struct pair *env;
+};
 
 //Binary operations
 enum Operation { ADDITION, MULTIPLICATION, SUBTRACTION, DIVISION };
@@ -52,6 +59,7 @@ struct k_binL
 	enum Operation op;
 	struct continuation *cont;
 	struct exp *rest;
+	struct pair *env;
 };
 struct k_binR
 {
@@ -65,31 +73,44 @@ struct k_ifzero
 	struct exp *fexp;
 	struct continuation *cont;
 };
+struct k_appL
+{
+   struct exp *arg;
+   struct pair *env;
+   struct continuation *cont;
+};
+struct k_appR
+{
+   struct closure *clos;
+   struct continuation *cont;
+};
 struct continuation
 {
-	enum { K_MT, K_BINL, K_BINR, K_IFZERO } type;
+	enum { K_MT, K_BINL, K_BINR, K_IFZERO, K_APPL, K_APPR } type;
 	union
 	{
 		struct k_mt mt;
 		struct k_binL binL;
 		struct k_binR binR;
 		struct k_ifzero ifzero;
+		struct k_appL appL;
+		struct k_appR appR;
 	} k;
 };
 
 //Definition of a FauxRacket value
 struct FRVal
 {
-	enum { FR_NUMBER, FR_FUNCTION };
+	enum { FR_NUMBER, FR_FUNCTION } type;
 	union
 	{
 		int n;
-		struct fun f; //TODO: should this be a closure?
-	};
+		struct closure clos; //TODO: should this be a closure?
+	} v;
 };
 
 struct exp *parse( struct node *prog );
 int convert_to_bin_type( char s );
-int interp_loop( struct exp *prog );
+struct FRVal interp_loop( struct exp *prog, struct pair *env );
 
 #endif

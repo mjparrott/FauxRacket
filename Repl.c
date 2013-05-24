@@ -25,7 +25,7 @@ int main(void)
 		if( prog->tag == LST && prog->sublst == NULL )
 			break;
 		
-		result = interp_loop( parse( prog ) );
+		result = interp_loop( parse( prog ), NULL );
 		printf( "%d\n", result );
 	}
 	

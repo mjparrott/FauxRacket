@@ -6,6 +6,7 @@
 
 /* parse: Take an s-expression representation of a program and convert it
           to an AST (abstract syntax tree)
+ * prog: 
  */
 struct exp *parse( struct node *prog )
 {
@@ -100,9 +101,12 @@ struct exp *parse( struct node *prog )
 	}
 }
 
-/* interp_loop: Take an AST and reduce it to a FauxRacket value
+/* 
+ * interp_loop: Take an AST and reduce it to a FauxRacket value
+ * prog: the AST representation of the program
+ * env: the environment containing symbol -> value mappings
  */
-int interp_loop( struct exp *prog )
+struct FRVal interp_loop( struct exp *prog, struct pair *env )
 {
 	//Initial continuation of interpreter is empty
 	struct continuation *k = malloc( sizeof( struct continuation ) );
@@ -114,7 +118,7 @@ int interp_loop( struct exp *prog )
 	k->type = K_MT;
 	//Possible interpreter states
 	enum { INTERP, APPLY_CONT, QUIT } state = INTERP;
-	int val = 0; //Meaningless initiailization value, shouldn't be relevant
+	struct FRVal val = { .type = FR_NUMBER, .v.n = 0 }; //Meaningless initiailization value, shouldn't be relevant
 	
 	while( state != QUIT )
 	{
@@ -152,14 +156,31 @@ int interp_loop( struct exp *prog )
 			}
 			else if( prog->type == FUN )
 			{
+			   struct closure c = (struct closure){ .param = prog->e.f.id, .body = prog->e.f.body, .env = env };
+			   val = (struct FRVal){ .type = FR_FUNCTION, .v.clos = c };
+			   state = APPLY_CONT;
 			}
 			else if( prog->type == APP )
 			{
+			   struct continuation *newk = malloc( sizeof( struct continuation ) );
+			   if( newk == NULL )
+			   {
+			      printf( "Error: out of memory\n" );
+			      abort();
+			   }
+			   
+			   newk->type = K_APPL;
+			   newk->k.appL.arg = prog->e.funApp.arg;
+			   newk->k.appL.env = env;
+			   newk->k.appL.cont = k;
+			   
+			   k = newk;
+			   prog = prog->e.funApp.func;
 			}
 			else if( prog->type == NUMBER )
 			{
 				state = APPLY_CONT;
-				val = prog->e.n;
+				val.v.n = prog->e.n;
 			}
 		}
 		else if( state == APPLY_CONT )
@@ -176,11 +197,12 @@ int interp_loop( struct exp *prog )
 					printf( "Error: out of memory\n" );
 					abort();
 				}
+				prog = k->k.binL.rest;
+				
 				newk->type = K_BINR;
 				newk->k.binR = (struct k_binR){ .op = k->k.binL.op,
 							.cont = k->k.binL.cont, .val = val };
 				
-				prog = k->k.binL.rest;
 				free(k);
 				k = newk;
 				state = INTERP;
@@ -191,19 +213,19 @@ int interp_loop( struct exp *prog )
 				
 				if( k->k.binR.op == ADDITION )
 				{
-					val = k->k.binR.val + val;
+					val.v.n = k->k.binR.val + val.v.n;
 				}
 				else if( k->k.binR.op == MULTIPLICATION )
 				{
-					val = k->k.binR.val * val;
+					val.v.n = k->k.binR.val * val.v.n;
 				}
 				else if( k->k.binR.op == SUBTRACTION )
 				{
-					val = k->k.binR.val - val;
+					val.v.n = k->k.binR.val - val.v.n;
 				}
 				else if( k->k.binR.op == DIVISION )
 				{
-					val = k->k.binR.val / val;
+					val.v.n = k->k.binR.val / val.v.n;
 				}
 				
 				k = k->k.binR.cont;
@@ -213,7 +235,7 @@ int interp_loop( struct exp *prog )
 			{
 				struct contination *temp = k;
 				
-				if( val == 0 )
+				if( val.v.n == 0 )
 				{
 					prog = k->k.ifzero.texp;
 				}
@@ -225,6 +247,32 @@ int interp_loop( struct exp *prog )
 				k = k->k.ifzero.cont;
 				free(temp);
 				state = INTERP;
+			}
+			else if( k->type == K_APPL )
+			{
+			   struct continuation *newk = malloc( sizeof( struct continuation ) );
+			   if( newk == NULL )
+			   {
+			      printf( "Error: out of memory\n" );
+			      abort();
+			   }
+			   prog = k->k.appL.arg;
+			   
+			   newk->type = K_APPR;
+			   newk->k.appR = (struct appR){ .clos = val.v.clos, .cont = k->k.appL.cont };
+			   
+			   free(k);
+			   k = newk;
+			   state = INTERP;
+			}
+			else if( k->type == K_APPR )
+			{
+			   struct continuation *temp = k;
+			   env = push( k->k.appR.clos.param, val, env );
+			   prog = k->k.appR.clos.body;
+			   free(k);
+			   k = temp->k.appR.cont;
+			   state = INTERP;
 			}
 		}
 	}
