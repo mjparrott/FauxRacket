@@ -28,7 +28,7 @@ struct app
 };
 struct exp
 {
-	enum { BIN, IFZERO, FUN, APP, NUMBER } type;
+	enum { BIN, IFZERO, FUN, APP, NUMBER, SYM } type;
 	union
 	{
 		struct bin b;
@@ -36,6 +36,7 @@ struct exp
 		struct fun f;
 		struct app funApp;
 		int n;
+		char *sym;
 	} e;
 };
 
@@ -81,7 +82,7 @@ struct k_appL
 };
 struct k_appR
 {
-   struct closure *clos;
+   struct closure clos;
    struct continuation *cont;
 };
 struct continuation
@@ -105,7 +106,7 @@ struct FRVal
 	union
 	{
 		int n;
-		struct closure clos; //TODO: should this be a closure?
+		struct closure clos;
 	} v;
 };
 

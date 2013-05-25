@@ -3,6 +3,7 @@
  */
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include "AssociationList.h"
 
 struct pair *push( char* sym, struct FRVal frv, struct pair *lst )
@@ -33,7 +34,6 @@ struct pair *pop( struct pair *lst )
 	}
 	
 	newLst = lst->next;
-	free( lst->frv );
 	free( lst );
 	
 	return newLst;

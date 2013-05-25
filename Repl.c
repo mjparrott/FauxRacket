@@ -10,7 +10,7 @@ For current syntax implemented, see Syntax.txt
 int main(void)
 {
 	struct node *prog;
-	int result;
+	struct FRVal result;
 	
 	printf( "Welcome to the Faux Racket interpreter!\n" );
 	printf( "To use this, enter a program to be interpreted.\n" );
@@ -24,9 +24,10 @@ int main(void)
 		//Check for the representation of the empty program
 		if( prog->tag == LST && prog->sublst == NULL )
 			break;
+		struct exp *parsed = parse(prog);
 		
-		result = interp_loop( parse( prog ), NULL );
-		printf( "%d\n", result );
+		result = interp_loop( parsed, NULL );
+		printf( "%d\n", result.v.n );
 	}
 	
 	printf( "\nEnd\n" );

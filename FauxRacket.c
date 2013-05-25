@@ -1,5 +1,6 @@
 #include "FauxRacket.h"
 #include "Sexp.h"
+#include "AssociationList.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,26 @@ struct exp *parse( struct node *prog )
 	}
 	
 	if( prog->tag == LST )
-		return parse( prog->sublst );
+	{
+		//(exp exp)
+		if( prog->rest != NULL )
+		{
+			struct exp *sexp = malloc( sizeof( struct exp ) );
+			if( sexp == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			
+			struct exp *func = parse( prog->sublst );
+			struct exp *arg = parse( prog->rest );
+			sexp->type = APP;
+			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
+			return sexp;
+		}
+		else
+			return parse( prog->sublst );
+	}
 	else if( prog->tag == NUM )
 	{
 		struct exp *sexp = malloc( sizeof( struct exp ) );
@@ -48,22 +68,6 @@ struct exp *parse( struct node *prog )
 			struct fun func = (struct fun){ .id = id, .body = body };
 			sexp->type = FUN;
 			sexp->e.f = func;
-			return sexp;
-		}
-		//(exp exp)
-		else if( prog->tag == LST && prog->rest != NULL )
-		{
-			struct exp *sexp = malloc( sizeof( struct exp ) );
-			if( sexp == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
-			
-			struct exp *func = parse( prog->sublst );
-			struct exp *arg = parse( prog->rest );
-			sexp->type = APP;
-			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
 			return sexp;
 		}
 		else if( strcmp( prog->str, "+" ) == 0 || strcmp( prog->str, "-" ) == 0
@@ -97,6 +101,19 @@ struct exp *parse( struct node *prog )
 			fin->type = IFZERO;
 			fin->e.ifz = (struct ifzero){ test, texp, fexp };
 			return fin;
+		}
+		else
+		{
+			struct exp *sym = malloc( sizeof( struct exp ) );
+			if( sym == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			
+			sym->type = SYM;
+			sym->e.sym = prog->str;
+			return sym;
 		}
 	}
 }
@@ -182,6 +199,18 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				state = APPLY_CONT;
 				val.v.n = prog->e.n;
 			}
+			else if( prog->type == SYM )
+			{
+				struct pair *p = find( prog->e.sym, env );
+				if( p == NULL )
+				{
+					printf( "Error: cannot find symbol %s\n", prog->e.sym );
+					abort();
+				}
+				
+				val = p->val;
+				state = APPLY_CONT;
+			}
 		}
 		else if( state == APPLY_CONT )
 		{
@@ -201,7 +230,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				
 				newk->type = K_BINR;
 				newk->k.binR = (struct k_binR){ .op = k->k.binL.op,
-							.cont = k->k.binL.cont, .val = val };
+							.cont = k->k.binL.cont, .val = val.v.n };
 				
 				free(k);
 				k = newk;
@@ -233,7 +262,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( k->type == K_IFZERO )
 			{
-				struct contination *temp = k;
+				struct continuation *temp = k;
 				
 				if( val.v.n == 0 )
 				{
@@ -259,7 +288,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			   prog = k->k.appL.arg;
 			   
 			   newk->type = K_APPR;
-			   newk->k.appR = (struct appR){ .clos = val.v.clos, .cont = k->k.appL.cont };
+			   newk->k.appR = (struct k_appR){ .clos = val.v.clos, .cont = k->k.appL.cont };
 			   
 			   free(k);
 			   k = newk;
