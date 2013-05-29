@@ -7,6 +7,10 @@ all: Repl
 
 Repl: Repl.o FauxRacket.o Sexp.o Helper.o AssociationList.o
 	$(CC) Repl.o FauxRacket.o Sexp.o Helper.o AssociationList.o -o Repl
+	
+tests: FauxRacket.o Sexp.o Helper.o AssociationList.o
+	$(CC) $(CFLAGS) Tests.c
+	$(CC) Tests.o FauxRacket.o Sexp.o Helper.o AssociationList.o -o Tests
 
 Repl.o: Repl.c
 	$(CC) $(CFLAGS) Repl.c
