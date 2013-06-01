@@ -9,8 +9,8 @@ Repl: Repl.o FauxRacket.o Sexp.o Helper.o AssociationList.o
 	$(CC) Repl.o FauxRacket.o Sexp.o Helper.o AssociationList.o -o Repl
 	
 tests: FauxRacket.o Sexp.o Helper.o AssociationList.o
-	$(CC) $(CFLAGS) Tests.c
-	$(CC) Tests.o FauxRacket.o Sexp.o Helper.o AssociationList.o -o Tests
+	$(CC) $(CFLAGS) Testing/Tests.c -I. -o Testing/Tests.o
+	$(CC) Testing/Tests.o FauxRacket.o Sexp.o Helper.o AssociationList.o -o Testing/Tests
 
 Repl.o: Repl.c
 	$(CC) $(CFLAGS) Repl.c
