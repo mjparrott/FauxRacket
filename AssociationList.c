@@ -41,11 +41,13 @@ struct pair *pop( struct pair *lst )
 
 struct pair *find( char* sym, struct pair *lst )
 {
+	printf( "find\n" );
    struct pair *p = lst;
    while( p != NULL )
    {
       if( strcmp( sym, p->sym ) == 0 )
          return p;
+      p = p->next;
    }
    return NULL;
 }

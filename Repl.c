@@ -24,8 +24,9 @@ int main(void)
 		//Check for the representation of the empty program
 		if( prog->tag == LST && prog->sublst == NULL )
 			break;
+			
 		struct exp *parsed = parse(prog);
-		
+		DEBUG_PRINTF( "parsing complete\n" );
 		result = interp_loop( parsed, NULL );
 		printf( "%d\n", result.v.n );
 	}

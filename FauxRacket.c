@@ -11,6 +11,8 @@
  */
 struct exp *parse( struct node *prog )
 {
+	//print_list( prog );
+	//printf( "\n" );
 	if( prog == NULL )
 	{
 		printf( "Error parsing\n" );
@@ -22,6 +24,7 @@ struct exp *parse( struct node *prog )
 		//(exp exp)
 		if( prog->rest != NULL )
 		{
+			DEBUG_PRINTF( "parse function application\n" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
 			if( sexp == NULL )
 			{
@@ -56,6 +59,7 @@ struct exp *parse( struct node *prog )
 		//(fun (id) exp)
 		if( strcmp( prog->str, "fun" ) == 0 )
 		{
+			DEBUG_PRINTF( "parse lambda function\n" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
 			if( sexp == NULL )
 			{
@@ -143,6 +147,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 		{
 			if( prog->type == BIN )
 			{
+				DEBUG_PRINTF("interp bin\n");
 				struct continuation *newk = malloc( sizeof( struct continuation ) );
 				if( newk == NULL )
 				{
@@ -173,12 +178,14 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( prog->type == FUN )
 			{
+				DEBUG_PRINTF( "interp fun\n" );
 			   struct closure c = (struct closure){ .param = prog->e.f.id, .body = prog->e.f.body, .env = env };
 			   val = (struct FRVal){ .type = FR_FUNCTION, .v.clos = c };
 			   state = APPLY_CONT;
 			}
 			else if( prog->type == APP )
 			{
+				DEBUG_PRINTF( "interp app\n" );
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
 			   if( newk == NULL )
 			   {
@@ -196,11 +203,13 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( prog->type == NUMBER )
 			{
+				DEBUG_PRINTF( "interp number\n" );
 				state = APPLY_CONT;
 				val.v.n = prog->e.n;
 			}
 			else if( prog->type == SYM )
 			{
+				DEBUG_PRINTF( "interp sym\n" );
 				struct pair *p = find( prog->e.sym, env );
 				if( p == NULL )
 				{
@@ -279,6 +288,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( k->type == K_APPL )
 			{
+				DEBUG_PRINTF( "apply appl\n" );
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
 			   if( newk == NULL )
 			   {
@@ -296,6 +306,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( k->type == K_APPR )
 			{
+				DEBUG_PRINTF( "apply appr\n" );
 			   struct continuation *temp = k;
 			   env = push( k->k.appR.clos.param, val, env );
 			   prog = k->k.appR.clos.body;
@@ -325,4 +336,4 @@ int convert_to_bin_type( char s )
 		return DIVISION;
 		
 	return -1;
-}	
+}

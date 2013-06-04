@@ -3,6 +3,14 @@
 
 #include "Sexp.h"
 
+#define DEBUG 0
+
+#ifdef DEBUG
+	#define DEBUG_PRINTF printf
+#else
+	#define DEBUG_PRINTF
+#endif
+
 //Parsing structures
 struct bin
 {
@@ -113,5 +121,6 @@ struct FRVal
 struct exp *parse( struct node *prog );
 int convert_to_bin_type( char s );
 struct FRVal interp_loop( struct exp *prog, struct pair *env );
+void debug_printf( const char *s );
 
 #endif
