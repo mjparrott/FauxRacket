@@ -2,3 +2,5 @@
 *.o
 Repl
 Testing/Tests
+Actual-Output.out
+Tests
