@@ -317,6 +317,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 		}
 	}
 	free(k);
+	free_assoc_list( env );
 	
 	return val;
 }
@@ -336,4 +337,37 @@ int convert_to_bin_type( char s )
 		return DIVISION;
 		
 	return -1;
+}
+
+/* free_ast: free an AST structure created by parse
+ */
+void free_ast( struct exp *ast )
+{
+	switch( ast->type )
+	{
+		case BIN:
+			free_ast( ast->e.b.left );
+			free_ast( ast->e.b.right );
+			break;
+		case IFZERO:
+			free_ast( ast->e.ifz.test );
+			free_ast (ast->e.ifz.texp );
+			free_ast( ast->e.ifz.fexp );
+			break;
+		case FUN:
+			free_ast( ast->e.f.body );
+			free( ast->e.f.id );
+			break;
+		case APP:
+			free_ast( ast->e.funApp.func );
+			free_ast( ast->e.funApp.arg );
+			break;
+		case SYM:
+			free( ast->e.sym );
+			break;
+		case NUMBER:
+		default:
+			break;
+	}
+	free(ast);
 }

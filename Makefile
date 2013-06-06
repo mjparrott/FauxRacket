@@ -1,7 +1,7 @@
 #Compiler
 CC = gcc
 #Flags to pass to the compiler
-CFLAGS = -std=c99 -O -Wall -c
+CFLAGS = -std=c99 -O -Wall -c -g
 
 all: Repl
 

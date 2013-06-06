@@ -92,7 +92,7 @@ char *read_id( int c )
 struct node *miread()
 {
 	struct token t;
-	struct node *newn;
+	struct node *newn = NULL;
 	t = read_token();
 	
 	if( t.tag == TEOF )
@@ -191,4 +191,26 @@ struct node *read_list()
 	}
 	
 	return newn;
+}
+
+/* free_sexp: free all the memory allocated by reading an s-expression
+ */
+void free_sexp( struct node *sexp )
+{
+	if( sexp != NULL )
+	{
+		switch( sexp->tag )
+		{
+			case NAME:
+				free( sexp->str );
+				break;
+			case NUM:
+				break;
+			case LST:
+				free_sexp( sexp->sublst );
+				break;
+		}
+		free_sexp( sexp->rest );
+		free( sexp );
+	}
 }

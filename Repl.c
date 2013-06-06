@@ -11,6 +11,7 @@ int main(void)
 {
 	struct node *prog;
 	struct FRVal result;
+	struct exp *parsed;
 	
 	printf( "Welcome to the Faux Racket interpreter!\n" );
 	printf( "To use this, enter a program to be interpreted.\n" );
@@ -25,11 +26,15 @@ int main(void)
 		if( prog->tag == LST && prog->sublst == NULL )
 			break;
 			
-		struct exp *parsed = parse(prog);
+		parsed = parse(prog);
 		DEBUG_PRINTF( "parsing complete\n" );
 		result = interp_loop( parsed, NULL );
 		printf( "%d\n", result.v.n );
+		
+		free_sexp( prog );
+		free_ast( parsed );
 	}
+	free( prog);
 	
 	printf( "\nEnd\n" );
 	return 0;

@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include "AssociationList.h"
 
+/* push: add a new pair onto the front of the association list
+ */
 struct pair *push( char* sym, struct FRVal frv, struct pair *lst )
 {
 	struct pair *newLst = malloc( sizeof( struct pair ) );
@@ -22,6 +24,8 @@ struct pair *push( char* sym, struct FRVal frv, struct pair *lst )
 	return newLst;
 }
 
+/* pop: take off the first pair in the association list
+ */
 struct pair *pop( struct pair *lst )
 {
 	if( lst == NULL )
@@ -39,6 +43,8 @@ struct pair *pop( struct pair *lst )
 	return newLst;
 }
 
+/* find: find the value with key sym in the association list lst
+ */
 struct pair *find( char* sym, struct pair *lst )
 {
 	printf( "find\n" );
@@ -50,4 +56,16 @@ struct pair *find( char* sym, struct pair *lst )
       p = p->next;
    }
    return NULL;
+}
+
+/* free_assoc_list: free all the memory allocated by lst
+ */
+void free_assoc_list( struct pair *lst )
+{
+	if( lst != NULL )
+	{
+		free( lst->sym );
+		free_assoc_list( lst->next );
+		free( lst );
+	}
 }

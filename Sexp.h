@@ -25,5 +25,6 @@ char *read_id( int c );
 struct node *miread();
 struct node *token_to_node( struct token t );
 struct node *read_list();
+void free_sexp( struct node *sexp );
 
 #endif

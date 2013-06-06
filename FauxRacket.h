@@ -121,6 +121,6 @@ struct FRVal
 struct exp *parse( struct node *prog );
 int convert_to_bin_type( char s );
 struct FRVal interp_loop( struct exp *prog, struct pair *env );
-void debug_printf( const char *s );
+void free_ast( struct exp *ast );
 
 #endif
