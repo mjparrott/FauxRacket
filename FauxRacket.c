@@ -19,6 +19,9 @@ struct exp *parse( struct node *prog )
 		abort();
 	}
 	
+	printf("%d\n",prog->tag);
+	printf("%p\n",prog->rest);
+	printf("%p\n",prog->sublst);
 	if( prog->tag == LST )
 	{
 		//(exp exp)
@@ -43,6 +46,7 @@ struct exp *parse( struct node *prog )
 	}
 	else if( prog->tag == NUM )
 	{
+		DEBUG_PRINTF("parse num\n");
 		struct exp *sexp = malloc( sizeof( struct exp ) );
 		if( sexp == NULL )
 		{
@@ -108,6 +112,7 @@ struct exp *parse( struct node *prog )
 		}
 		else
 		{
+			DEBUG_PRINTF("parse sym\n");
 			struct exp *sym = malloc( sizeof( struct exp ) );
 			if( sym == NULL )
 			{
@@ -157,7 +162,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			
 				newk->type = K_BINL;
 				newk->k.binL = (struct k_binL){ .op = convert_to_bin_type( prog->e.b.op ), 
-							.cont = k, .rest = prog->e.b.right };
+							.cont = k, .rest = prog->e.b.right, .env = env };
 				prog = prog->e.b.left;
 				k = newk;
 			}
@@ -172,7 +177,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				
 				newk->type = K_IFZERO;
 				newk->k.ifzero = (struct k_ifzero){ .texp = prog->e.ifz.texp,
-							.fexp = prog->e.ifz.fexp, .cont = k };
+							.fexp = prog->e.ifz.fexp, .cont = k, .env = env };
 				prog = prog->e.ifz.test;
 				k = newk;
 			}
@@ -225,6 +230,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 		{
 			if( k->type == K_MT )
 			{
+				DEBUG_PRINTF("apply k_mt\n");
 				state = QUIT;
 			}
 			else if( k->type == K_BINL )
@@ -300,6 +306,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			   newk->type = K_APPR;
 			   newk->k.appR = (struct k_appR){ .clos = val.v.clos, .cont = k->k.appL.cont };
 			   
+			   env = k->k.appL.env;
 			   free(k);
 			   k = newk;
 			   state = INTERP;
@@ -307,6 +314,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			else if( k->type == K_APPR )
 			{
 				DEBUG_PRINTF( "apply appr\n" );
+				DEBUG_PRINTF( "closure param: %s\n", k->k.appR.clos.param );
 			   struct continuation *temp = k;
 			   env = push( k->k.appR.clos.param, val, env );
 			   prog = k->k.appR.clos.body;

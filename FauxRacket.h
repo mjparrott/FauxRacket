@@ -3,7 +3,7 @@
 
 #include "Sexp.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #ifdef DEBUG
 	#define DEBUG_PRINTF printf
@@ -80,6 +80,7 @@ struct k_ifzero
 {
 	struct exp *texp;
 	struct exp *fexp;
+	struct pair *env;
 	struct continuation *cont;
 };
 struct k_appL

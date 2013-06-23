@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "AssociationList.h"
+#include "FauxRacket.h"
 
 /* push: add a new pair onto the front of the association list
  */
@@ -47,7 +48,7 @@ struct pair *pop( struct pair *lst )
  */
 struct pair *find( char* sym, struct pair *lst )
 {
-	printf( "find\n" );
+	DEBUG_PRINTF( "find %s\n", sym );
    struct pair *p = lst;
    while( p != NULL )
    {
@@ -55,6 +56,7 @@ struct pair *find( char* sym, struct pair *lst )
          return p;
       p = p->next;
    }
+   DEBUG_PRINTF("found none\n");
    return NULL;
 }
 
