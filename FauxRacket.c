@@ -19,14 +19,12 @@ struct exp *parse( struct node *prog )
 		abort();
 	}
 	
-	printf("%d\n",prog->tag);
-	printf("%p\n",prog->rest);
-	printf("%p\n",prog->sublst);
 	if( prog->tag == LST )
 	{
 		//(exp exp)
 		if( prog->rest != NULL )
 		{
+			//NOTE: this code is repeated later on
 			DEBUG_PRINTF( "parse function application\n" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
 			if( sexp == NULL )
@@ -109,6 +107,31 @@ struct exp *parse( struct node *prog )
 			fin->type = IFZERO;
 			fin->e.ifz = (struct ifzero){ test, texp, fexp };
 			return fin;
+		}
+		//(sym exp), function application
+		else if( prog->rest != NULL )
+		{
+			//NOTE: avoid repeating this code
+			DEBUG_PRINTF( "parse function application\n" );
+			struct exp *sexp = malloc( sizeof( struct exp ) );
+			if( sexp == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			
+			struct exp *func = malloc(sizeof(struct exp));
+			if( func == NULL )
+			{
+				printf( "Error: out of memory\n" );
+				abort();
+			}
+			func->type = SYM;
+			func->e.sym = prog->str;
+			struct exp *arg = parse( prog->rest );
+			sexp->type = APP;
+			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
+			return sexp;
 		}
 		else
 		{

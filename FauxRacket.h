@@ -3,7 +3,7 @@
 
 #include "Sexp.h"
 
-#define DEBUG 1
+//#define DEBUG 0
 
 #ifdef DEBUG
 	#define DEBUG_PRINTF printf

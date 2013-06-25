@@ -31,10 +31,10 @@ int main(void)
 		result = interp_loop( parsed, NULL );
 		printf( "%d\n", result.v.n );
 		
-		free_sexp( prog );
-		free_ast( parsed );
+		//free_sexp( prog );
+		//free_ast( parsed );
 	}
-	free( prog);
+	free(prog);
 	
 	printf( "\nEnd\n" );
 	return 0;
