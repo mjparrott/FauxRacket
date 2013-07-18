@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "AssociationList.h"
 #include "FauxRacket.h"
+#include "dbg.h"
 
 /* push: add a new pair onto the front of the association list
  */
@@ -31,11 +32,15 @@ struct pair *pop( struct pair *lst )
 {
 	if( lst == NULL )
 	{
+		log_err( "Cannot pop an empty list." );
+		return NULL;
 	}
 	
 	struct pair *newLst = malloc( sizeof( struct pair ) );
 	if( newLst == NULL )
 	{
+		printf( "Error: out of memory\n" );
+		abort();
 	}
 	
 	newLst = lst->next;
@@ -48,7 +53,7 @@ struct pair *pop( struct pair *lst )
  */
 struct pair *find( char* sym, struct pair *lst )
 {
-	DEBUG_PRINTF( "find %s\n", sym );
+	debug( "Looking for %s in the list", sym );
    struct pair *p = lst;
    while( p != NULL )
    {
@@ -56,7 +61,7 @@ struct pair *find( char* sym, struct pair *lst )
          return p;
       p = p->next;
    }
-   DEBUG_PRINTF("found none\n");
+   debug("Did not find the symbol.");
    return NULL;
 }
 

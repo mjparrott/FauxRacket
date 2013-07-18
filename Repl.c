@@ -1,11 +1,12 @@
 /* Implement a REPL for Faux Racket
 
-For current syntax implemented, see Syntax.txt
-*/
+ * For current syntax implemented, see Syntax.txt
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include "Sexp.h"
 #include "FauxRacket.h"
+#include "dbg.h"
 
 int main(void)
 {
@@ -27,14 +28,13 @@ int main(void)
 			break;
 			
 		parsed = parse(prog);
-		DEBUG_PRINTF( "parsing complete\n" );
+		debug( "Parsing complete." );
 		result = interp_loop( parsed, NULL );
 		printf( "%d\n", result.v.n );
 		
 		//free_sexp( prog );
 		//free_ast( parsed );
 	}
-	free(prog);
 	
 	printf( "\nEnd\n" );
 	return 0;

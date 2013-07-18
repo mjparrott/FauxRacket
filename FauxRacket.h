@@ -3,14 +3,6 @@
 
 #include "Sexp.h"
 
-//#define DEBUG 0
-
-#ifdef DEBUG
-	#define DEBUG_PRINTF printf
-#else
-	#define DEBUG_PRINTF
-#endif
-
 //Parsing structures
 struct bin
 {

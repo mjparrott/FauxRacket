@@ -1,6 +1,7 @@
 .sass-cache
 *.o
 Repl
+ReplDebug
 Testing/Tests
 Actual-Output.out
 Tests

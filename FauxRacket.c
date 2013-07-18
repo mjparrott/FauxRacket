@@ -1,18 +1,17 @@
 #include "FauxRacket.h"
 #include "Sexp.h"
 #include "AssociationList.h"
+#include "dbg.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 /* parse: Take an s-expression representation of a program and convert it
           to an AST (abstract syntax tree)
- * prog: 
+ * prog: S-expression representation of the program.
  */
 struct exp *parse( struct node *prog )
 {
-	//print_list( prog );
-	//printf( "\n" );
 	if( prog == NULL )
 	{
 		printf( "Error parsing\n" );
@@ -25,7 +24,7 @@ struct exp *parse( struct node *prog )
 		if( prog->rest != NULL )
 		{
 			//NOTE: this code is repeated later on
-			DEBUG_PRINTF( "parse function application\n" );
+			debug( "Parsing function application" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
 			if( sexp == NULL )
 			{
@@ -44,7 +43,7 @@ struct exp *parse( struct node *prog )
 	}
 	else if( prog->tag == NUM )
 	{
-		DEBUG_PRINTF("parse num\n");
+		debug("Parsing a number: %d", prog->num);
 		struct exp *sexp = malloc( sizeof( struct exp ) );
 		if( sexp == NULL )
 		{
@@ -61,7 +60,7 @@ struct exp *parse( struct node *prog )
 		//(fun (id) exp)
 		if( strcmp( prog->str, "fun" ) == 0 )
 		{
-			DEBUG_PRINTF( "parse lambda function\n" );
+			debug( "Parsing lambda function" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
 			if( sexp == NULL )
 			{
@@ -112,7 +111,7 @@ struct exp *parse( struct node *prog )
 		else if( prog->rest != NULL )
 		{
 			//NOTE: avoid repeating this code
-			DEBUG_PRINTF( "parse function application\n" );
+			debug( "Parsing function application" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
 			if( sexp == NULL )
 			{
@@ -135,7 +134,7 @@ struct exp *parse( struct node *prog )
 		}
 		else
 		{
-			DEBUG_PRINTF("parse sym\n");
+			debug("Parsing symbol");
 			struct exp *sym = malloc( sizeof( struct exp ) );
 			if( sym == NULL )
 			{
@@ -151,7 +150,7 @@ struct exp *parse( struct node *prog )
 }
 
 /* 
- * interp_loop: Take an AST and reduce it to a FauxRacket value
+ * interp_loop: Take an AST and reduce it to a FauxRacket value (FRVal)
  * prog: the AST representation of the program
  * env: the environment containing symbol -> value mappings
  */
@@ -175,7 +174,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 		{
 			if( prog->type == BIN )
 			{
-				DEBUG_PRINTF("interp bin\n");
+				debug("Interpret bin structure");
 				struct continuation *newk = malloc( sizeof( struct continuation ) );
 				if( newk == NULL )
 				{
@@ -206,14 +205,14 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( prog->type == FUN )
 			{
-				DEBUG_PRINTF( "interp fun\n" );
+				debug( "Interpret fun structure" );
 			   struct closure c = (struct closure){ .param = prog->e.f.id, .body = prog->e.f.body, .env = env };
 			   val = (struct FRVal){ .type = FR_FUNCTION, .v.clos = c };
 			   state = APPLY_CONT;
 			}
 			else if( prog->type == APP )
 			{
-				DEBUG_PRINTF( "interp app\n" );
+				debug( "Interpret app structure" );
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
 			   if( newk == NULL )
 			   {
@@ -231,13 +230,13 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( prog->type == NUMBER )
 			{
-				DEBUG_PRINTF( "interp number\n" );
+				debug( "Interpret number: %d", prog->e.n );
 				state = APPLY_CONT;
 				val.v.n = prog->e.n;
 			}
 			else if( prog->type == SYM )
 			{
-				DEBUG_PRINTF( "interp sym\n" );
+				debug( "Interpret symbol" );
 				struct pair *p = find( prog->e.sym, env );
 				if( p == NULL )
 				{
@@ -253,7 +252,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 		{
 			if( k->type == K_MT )
 			{
-				DEBUG_PRINTF("apply k_mt\n");
+				debug("Apply k_mt continuation");
 				state = QUIT;
 			}
 			else if( k->type == K_BINL )
@@ -317,7 +316,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( k->type == K_APPL )
 			{
-				DEBUG_PRINTF( "apply appl\n" );
+				debug( "Apply appL continuation" );
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
 			   if( newk == NULL )
 			   {
@@ -336,8 +335,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( k->type == K_APPR )
 			{
-				DEBUG_PRINTF( "apply appr\n" );
-				DEBUG_PRINTF( "closure param: %s\n", k->k.appR.clos.param );
+				debug( "Apply appR continuation" );
 			   struct continuation *temp = k;
 			   env = push( k->k.appR.clos.param, val, env );
 			   prog = k->k.appR.clos.body;
