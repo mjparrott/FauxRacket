@@ -238,6 +238,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			{
 				debug( "Interpret symbol" );
 				struct pair *p = find( prog->e.sym, env );
+				check(p, "Cannot find symbol %s", prog->e.sym);
 				if( p == NULL )
 				{
 					printf( "Error: cannot find symbol %s\n", prog->e.sym );
@@ -257,14 +258,12 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			}
 			else if( k->type == K_BINL )
 			{
-				struct continuation *newk = malloc( sizeof( struct continuation ) );
-				if( newk == NULL )
-				{
-					printf( "Error: out of memory\n" );
-					abort();
-				}
-				prog = k->k.binL.rest;
+				debug("Apply k_binl continuation");
 				
+				struct continuation *newk = malloc( sizeof( struct continuation ) );
+				check_mem(newk);
+				
+				prog = k->k.binL.rest;
 				newk->type = K_BINR;
 				newk->k.binR = (struct k_binR){ .op = k->k.binL.op,
 							.cont = k->k.binL.cont, .val = val.v.n };
@@ -317,6 +316,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			else if( k->type == K_APPL )
 			{
 				debug( "Apply appL continuation" );
+				
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
 			   if( newk == NULL )
 			   {
@@ -336,6 +336,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			else if( k->type == K_APPR )
 			{
 				debug( "Apply appR continuation" );
+				
 			   struct continuation *temp = k;
 			   env = push( k->k.appR.clos.param, val, env );
 			   prog = k->k.appR.clos.body;
@@ -348,6 +349,9 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 	free(k);
 	free_assoc_list( env );
 	
+	return val;
+
+error:
 	return val;
 }
 

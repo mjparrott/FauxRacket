@@ -13,17 +13,16 @@
 struct pair *push( char* sym, struct FRVal frv, struct pair *lst )
 {
 	struct pair *newLst = malloc( sizeof( struct pair ) );
-	if( newLst == NULL )
-	{
-		printf( "Error: out of memory\n" );
-		abort();
-	}
+	check_mem(newLst);
 	
 	newLst->sym = sym;
 	newLst->val = frv;
 	newLst->next = lst;
 	
 	return newLst;
+
+error:
+	return NULL;
 }
 
 /* pop: take off the first pair in the association list

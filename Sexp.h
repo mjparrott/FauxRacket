@@ -10,7 +10,7 @@ struct node
 	struct node *rest;
 };
 
-#define NSIZE sizeof(struct node)
+#define NSIZE (sizeof(struct node))
 
 struct token
 {

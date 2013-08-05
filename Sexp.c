@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include "Sexp.h"
 #include "Helper.h"
+#include "dbg.h"
 
 /* read_token: Read an S-expression token
  */
@@ -77,10 +78,14 @@ char *read_id( int c )
 		{
 			buf[i] = '\0';
 			newstr = malloc( strlen(buf) + 1 );
+			check_mem(newstr);
 			strcpy( newstr, buf );
 			return newstr;
 		}
 	}
+
+error:
+	return NULL;
 }
 
 /* miread: Read an s-expression into a node structure
@@ -102,11 +107,8 @@ struct node *miread()
 	else if ( t.tag == LPAR )
 	{
 		newn = malloc(NSIZE);
-		if( newn == NULL )
-		{
-			printf( "Error: malloc out of memory\n" );
-			abort();
-		}
+		check_mem(newn);
+
 		newn->tag = LST;
 		newn->sublst = read_list();
 		return newn;
@@ -120,6 +122,9 @@ struct node *miread()
 	{
 		token_to_node(t);
 	}
+	
+error:
+	return NULL;
 }
 
 
@@ -129,11 +134,7 @@ struct node *token_to_node( struct token t )
 {
 	struct node *newn;
 	newn = malloc(NSIZE);
-	if( newn == NULL )
-	{
-		printf( "Error: malloc out of memory\n" );
-		abort();
-	}
+	check_mem(newn);
 	
 	if( t.tag == INT )
 	{
@@ -147,6 +148,9 @@ struct node *token_to_node( struct token t )
 	}
 	
 	return newn;
+
+error:
+	return NULL;
 }
 
 /* read_list: Read a list into a node structure
@@ -209,8 +213,14 @@ void free_sexp( struct node *sexp )
 			case LST:
 				free_sexp( sexp->sublst );
 				break;
+			default:
+				sentinel("Non-existent tag: %d", sexp->tag);
+				break;
 		}
 		free_sexp( sexp->rest );
 		free( sexp );
 	}
+
+error:
+	return;
 }

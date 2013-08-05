@@ -3,8 +3,6 @@ CC = gcc
 #Flags to pass to the compiler
 CFLAGS = -std=c99 -O -Wall -c -g
 
-all: CFLAGS += -DNDEBUG
-Repl: CFLAGS += -DNDEBUG
 tests: CFLAGS += -DNDEBUG
 
 all: Repl
