@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 /* parse: Take an s-expression representation of a program and convert it
           to an AST (abstract syntax tree)
@@ -12,44 +13,36 @@
  */
 struct exp *parse( struct node *prog )
 {
-	if( prog == NULL )
-	{
-		printf( "Error parsing\n" );
-		abort();
-	}
+	assert(prog != NULL);
 	
 	if( prog->tag == LST )
 	{
+		struct exp *sublstParse = parse( prog->sublst );
+		
 		//(exp exp)
-		if( prog->rest != NULL )
+		if( sublstParse->type == FUN )
 		{
 			//NOTE: this code is repeated later on
 			debug( "Parsing function application" );
 			struct exp *sexp = malloc( sizeof( struct exp ) );
-			if( sexp == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
+			check_mem(sexp);
 			
-			struct exp *func = parse( prog->sublst );
+			struct exp *func = sublstParse;
 			struct exp *arg = parse( prog->rest );
 			sexp->type = APP;
 			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
 			return sexp;
 		}
 		else
-			return parse( prog->sublst );
+		{
+			return sublstParse;
+		}
 	}
 	else if( prog->tag == NUM )
 	{
-		debug("Parsing a number: %d", prog->num);
+		debug( "Parsing a number: %d", prog->num );
 		struct exp *sexp = malloc( sizeof( struct exp ) );
-		if( sexp == NULL )
-		{
-			printf( "Error: out of memory\n" );
-			abort();
-		}
+		check_mem(sexp);
 		
 		sexp->type = NUMBER;
 		sexp->e.n = prog->num;
@@ -61,14 +54,11 @@ struct exp *parse( struct node *prog )
 		if( strcmp( prog->str, "fun" ) == 0 )
 		{
 			debug( "Parsing lambda function" );
-			struct exp *sexp = malloc( sizeof( struct exp ) );
-			if( sexp == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
 			
-			char* id = prog->rest->sublst->str; //TODO: error checking
+			struct exp *sexp = malloc( sizeof( struct exp ) );
+			check_mem(sexp);
+			
+			char* id = strdup(prog->rest->sublst->str); //TODO: error checking
 			struct exp *body = parse( prog->rest->rest );
 			struct fun func = (struct fun){ .id = id, .body = body };
 			sexp->type = FUN;
@@ -83,11 +73,7 @@ struct exp *parse( struct node *prog )
 			struct exp *exp1 = parse( prog->rest );
 			struct exp *exp2 = parse( prog->rest->rest );
 			struct exp *fin = malloc( sizeof( struct exp ) );
-			if( fin == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
+			check_mem(fin);
 			
 			fin->type = BIN;
 			fin->e.b = (struct bin){ prog->str[0], exp1, exp2 };
@@ -99,11 +85,7 @@ struct exp *parse( struct node *prog )
 			struct exp *texp = parse( prog->rest->rest );
 			struct exp *fexp = parse( prog->rest->rest->rest );
 			struct exp *fin = malloc( sizeof( struct exp ) );
-			if( fin == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
+			check_mem(fin);
 			
 			fin->type = IFZERO;
 			fin->e.ifz = (struct ifzero){ test, texp, fexp };
@@ -114,19 +96,13 @@ struct exp *parse( struct node *prog )
 		{
 			//NOTE: avoid repeating this code
 			debug( "Parsing function application" );
-			struct exp *sexp = malloc( sizeof( struct exp ) );
-			if( sexp == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
 			
-			struct exp *func = malloc(sizeof(struct exp));
-			if( func == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
+			struct exp *sexp = malloc( sizeof( struct exp ) );
+			check_mem(sexp);
+			
+			struct exp *func = malloc( sizeof( struct exp ) );
+			check_mem(func);
+			
 			func->type = SYM;
 			func->e.sym = prog->str;
 			struct exp *arg = parse( prog->rest );
@@ -137,12 +113,9 @@ struct exp *parse( struct node *prog )
 		else
 		{
 			debug("Parsing symbol");
+			
 			struct exp *sym = malloc( sizeof( struct exp ) );
-			if( sym == NULL )
-			{
-				printf( "Error: out of memory\n" );
-				abort();
-			}
+			check_mem(sym);
 			
 			sym->type = SYM;
 			sym->e.sym = strdup(prog->str);
@@ -150,6 +123,7 @@ struct exp *parse( struct node *prog )
 		}
 	}
 
+	sentinel("Returning nothing from parse.");
 error:
 	return NULL;
 }
@@ -208,11 +182,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			{
 				debug( "Interpret app structure" );
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
-			   if( newk == NULL )
-			   {
-			      printf( "Error: out of memory\n" );
-			      abort();
-			   }
+			   check_mem(newk);
 			   
 			   newk->type = K_APPL;
 			   newk->k.appL.arg = prog->e.funApp.arg;
@@ -233,11 +203,6 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				debug( "Interpret symbol" );
 				struct pair *p = find( prog->e.sym, env );
 				check(p, "Cannot find symbol %s", prog->e.sym);
-				if( p == NULL )
-				{
-					printf( "Error: cannot find symbol %s\n", prog->e.sym );
-					abort();
-				}
 				
 				val = p->val;
 				state = APPLY_CONT;
@@ -312,13 +277,9 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				debug( "Apply appL continuation" );
 				
 			   struct continuation *newk = malloc( sizeof( struct continuation ) );
-			   if( newk == NULL )
-			   {
-			      printf( "Error: out of memory\n" );
-			      abort();
-			   }
-			   prog = k->k.appL.arg;
+			   check_mem(newk);
 			   
+			   prog = k->k.appL.arg;
 			   newk->type = K_APPR;
 			   newk->k.appR = (struct k_appR){ .clos = val.v.clos, .cont = k->k.appL.cont };
 			   
