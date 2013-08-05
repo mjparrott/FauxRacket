@@ -53,6 +53,7 @@ struct pair *pop( struct pair *lst )
 struct pair *find( char* sym, struct pair *lst )
 {
 	debug( "Looking for %s in the list", sym );
+	
    struct pair *p = lst;
    while( p != NULL )
    {

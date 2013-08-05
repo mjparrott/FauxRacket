@@ -34,11 +34,13 @@ struct token read_token()
 	{
 		t.tag = STR;
 		t.str = read_id(c);
+		debug("Read string: %s", t.str);
 	}
 	else if( isdigit(c) )
 	{
 		t.tag = INT;
 		t.num = read_nat(c);
+		debug("Read string: %d", t.num);
 	}
 	else
 	{

@@ -158,11 +158,8 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 {
 	//Initial continuation of interpreter is empty
 	struct continuation *k = malloc( sizeof( struct continuation ) );
-	if( k == NULL )
-	{
-		printf( "Error: out of memory\n" );
-		abort();
-	}
+	check_mem(k);
+	
 	k->type = K_MT;
 	//Possible interpreter states
 	enum { INTERP, APPLY_CONT, QUIT } state = INTERP;
@@ -176,11 +173,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			{
 				debug("Interpret bin structure");
 				struct continuation *newk = malloc( sizeof( struct continuation ) );
-				if( newk == NULL )
-				{
-					printf( "Error: out of memory\n" );
-					abort();
-				}
+				check_mem(newk);
 			
 				newk->type = K_BINL;
 				newk->k.binL = (struct k_binL){ .op = convert_to_bin_type( prog->e.b.op ), 
@@ -191,11 +184,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			else if( prog->type == IFZERO )
 			{
 				struct continuation *newk = malloc( sizeof( struct continuation ) );
-				if( newk == NULL )
-				{
-					printf( "Error: out of memory\n" );
-					abort();
-				}
+				check_mem(newk);
 				
 				newk->type = K_IFZERO;
 				newk->k.ifzero = (struct k_ifzero){ .texp = prog->e.ifz.texp,
@@ -384,7 +373,7 @@ void free_ast( struct exp *ast )
 			break;
 		case IFZERO:
 			free_ast( ast->e.ifz.test );
-			free_ast (ast->e.ifz.texp );
+			free_ast( ast->e.ifz.texp );
 			free_ast( ast->e.ifz.fexp );
 			break;
 		case FUN:
@@ -399,6 +388,7 @@ void free_ast( struct exp *ast )
 			free( ast->e.sym );
 			break;
 		case NUMBER:
+			break;
 		default:
 			break;
 	}

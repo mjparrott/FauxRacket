@@ -22,6 +22,7 @@ int main(void)
 	{
 		printf( "Enter a Faux Racket program to be interpreted:\n" );
 		prog = miread();
+		debug("Reading s-expression complete.");
 		
 		//Check for the representation of the empty program
 		if( prog->tag == LST && prog->sublst == NULL )
@@ -34,6 +35,8 @@ int main(void)
 		
 		//free_sexp( prog );
 		//free_ast( parsed );
+		prog = NULL;
+		parsed = NULL;
 	}
 	
 	printf( "\nEnd\n" );
