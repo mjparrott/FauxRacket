@@ -22,19 +22,19 @@ int main(void)
 	{
 		printf( "Enter a Faux Racket program to be interpreted:\n" );
 		prog = miread();
-		debug("Reading s-expression complete.");
+		debug("Reading s-expression complete.\n");
 		
 		//Check for the representation of the empty program
 		if( prog->tag == LST && prog->sublst == NULL )
 			break;
 			
 		parsed = parse(prog);
-		debug( "Parsing complete." );
+		debug( "Parsing complete.\n" );
 		result = interp_loop( parsed, NULL );
 		printf( "%d\n", result.v.n );
 		
-		//free_sexp( prog );
-		//free_ast( parsed );
+		free_sexp( prog );
+		free_ast( parsed );
 		prog = NULL;
 		parsed = NULL;
 	}

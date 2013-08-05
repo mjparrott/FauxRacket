@@ -47,6 +47,7 @@ struct token read_token()
 		printf( "bad character: %c\n", c );
 		abort();
 	}
+	
 	return t;
 }
 
@@ -99,7 +100,7 @@ error:
 struct node *miread()
 {
 	struct token t;
-	struct node *newn = NULL;
+	struct node *newn;
 	t = read_token();
 	
 	if( t.tag == TEOF )
@@ -108,6 +109,8 @@ struct node *miread()
 	}
 	else if ( t.tag == LPAR )
 	{
+		debug("Reading a list.");
+		
 		newn = malloc(NSIZE);
 		check_mem(newn);
 
@@ -209,18 +212,22 @@ void free_sexp( struct node *sexp )
 		{
 			case NAME:
 				free( sexp->str );
+				sexp->str = NULL;
 				break;
 			case NUM:
 				break;
 			case LST:
 				free_sexp( sexp->sublst );
+				sexp->sublst = NULL;
 				break;
 			default:
 				sentinel("Non-existent tag: %d", sexp->tag);
 				break;
 		}
 		free_sexp( sexp->rest );
+		sexp->rest = NULL;
 		free( sexp );
+		sexp = NULL;
 	}
 
 error:

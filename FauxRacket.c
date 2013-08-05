@@ -78,6 +78,8 @@ struct exp *parse( struct node *prog )
 		else if( strcmp( prog->str, "+" ) == 0 || strcmp( prog->str, "-" ) == 0
 		|| strcmp( prog->str, "*" ) == 0 || strcmp( prog->str, "/" ) == 0 )
 		{
+			debug("Parsing binary structure.");
+			
 			struct exp *exp1 = parse( prog->rest );
 			struct exp *exp2 = parse( prog->rest->rest );
 			struct exp *fin = malloc( sizeof( struct exp ) );
@@ -143,10 +145,13 @@ struct exp *parse( struct node *prog )
 			}
 			
 			sym->type = SYM;
-			sym->e.sym = prog->str;
+			sym->e.sym = strdup(prog->str);
 			return sym;
 		}
 	}
+
+error:
+	return NULL;
 }
 
 /* 
@@ -323,7 +328,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			   state = INTERP;
 			}
 			else if( k->type == K_APPR )
-			{
+			{ 
 				debug( "Apply appR continuation" );
 				
 			   struct continuation *temp = k;
@@ -369,23 +374,33 @@ void free_ast( struct exp *ast )
 	{
 		case BIN:
 			free_ast( ast->e.b.left );
+			ast->e.b.left = NULL;
 			free_ast( ast->e.b.right );
+			ast->e.b.right = NULL;
 			break;
 		case IFZERO:
 			free_ast( ast->e.ifz.test );
+			ast->e.ifz.test = NULL;
 			free_ast( ast->e.ifz.texp );
+			ast->e.ifz.test = NULL;
 			free_ast( ast->e.ifz.fexp );
+			ast->e.ifz.fexp = NULL;
 			break;
 		case FUN:
 			free_ast( ast->e.f.body );
+			ast->e.f.body = NULL;
 			free( ast->e.f.id );
+			ast->e.f.id = NULL;
 			break;
 		case APP:
 			free_ast( ast->e.funApp.func );
+			ast->e.funApp.func = NULL;
 			free_ast( ast->e.funApp.arg );
+			ast->e.funApp.func = NULL;
 			break;
 		case SYM:
 			free( ast->e.sym );
+			ast->e.sym = NULL;
 			break;
 		case NUMBER:
 			break;
@@ -393,4 +408,5 @@ void free_ast( struct exp *ast )
 			break;
 	}
 	free(ast);
+	ast = NULL;
 }

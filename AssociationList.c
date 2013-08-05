@@ -72,7 +72,10 @@ void free_assoc_list( struct pair *lst )
 	if( lst != NULL )
 	{
 		free( lst->sym );
+		lst->sym = NULL;
 		free_assoc_list( lst->next );
+		lst->next = NULL;
 		free( lst );
+		lst = NULL;
 	}
 }
