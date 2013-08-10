@@ -15,7 +15,7 @@ struct pair *push( char* sym, struct FRVal frv, struct pair *lst )
 	struct pair *newLst = malloc( sizeof( struct pair ) );
 	check_mem(newLst);
 	
-	newLst->sym = sym;
+	newLst->sym = strdup(sym);
 	newLst->val = frv;
 	newLst->next = lst;
 	
@@ -58,11 +58,43 @@ struct pair *find( char* sym, struct pair *lst )
    while( p != NULL )
    {
       if( strcmp( sym, p->sym ) == 0 )
+      {
+      	debug( "Found %s: has value %d.", sym, p->val.v.n );
          return p;
+      }
       p = p->next;
    }
    debug("Did not find the symbol.");
    return NULL;
+}
+
+/* make_copy_env: Make a copy of the environment
+ */
+struct pair *make_copy_env(struct pair *env)
+{
+	debug( "Making environment copy." );
+	
+	struct pair *lst;
+	struct pair *cur;
+	struct pair *p = env;
+	
+	while(p != NULL)
+	{
+		cur = malloc(sizeof(struct pair));
+		check_mem(cur);
+		
+		cur->sym = strdup(p->sym);
+		cur->val = p->val;
+		cur->next = lst;
+		lst = cur;
+		
+		p = p->next;
+	}
+	
+	return lst;
+	
+error:
+	return NULL;
 }
 
 /* free_assoc_list: free all the memory allocated by lst

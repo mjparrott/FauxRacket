@@ -17,10 +17,12 @@ struct exp *parse( struct node *prog )
 	
 	if( prog->tag == LST )
 	{
+		//return parse
+		debug( "Parsing a list" );
 		struct exp *sublstParse = parse( prog->sublst );
 		
 		//(exp exp)
-		if( sublstParse->type == FUN )
+		if( (sublstParse->type == FUN || sublstParse->type == SYM) && prog->rest != NULL )
 		{
 			//NOTE: this code is repeated later on
 			debug( "Parsing function application" );
@@ -92,7 +94,7 @@ struct exp *parse( struct node *prog )
 			return fin;
 		}
 		//(sym exp), function application
-		else if( prog->rest != NULL )
+		/*else if( prog->rest != NULL )
 		{
 			//NOTE: avoid repeating this code
 			debug( "Parsing function application" );
@@ -109,7 +111,7 @@ struct exp *parse( struct node *prog )
 			sexp->type = APP;
 			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
 			return sexp;
-		}
+		}*/
 		else
 		{
 			debug("Parsing symbol");
@@ -121,6 +123,10 @@ struct exp *parse( struct node *prog )
 			sym->e.sym = strdup(prog->str);
 			return sym;
 		}
+	}
+	else
+	{
+		sentinel("Non-existent tag found.");
 	}
 
 	sentinel("Returning nothing from parse.");
@@ -174,7 +180,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			else if( prog->type == FUN )
 			{
 				debug( "Interpret fun structure" );
-			   struct closure c = (struct closure){ .param = prog->e.f.id, .body = prog->e.f.body, .env = env };
+			   struct closure c = (struct closure){ .param = strdup(prog->e.f.id), .body = prog->e.f.body, .env = make_copy_env(env) };
 			   val = (struct FRVal){ .type = FR_FUNCTION, .v.clos = c };
 			   state = APPLY_CONT;
 			}
@@ -186,7 +192,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			   
 			   newk->type = K_APPL;
 			   newk->k.appL.arg = prog->e.funApp.arg;
-			   newk->k.appL.env = env;
+			   newk->k.appL.env = make_copy_env(env);
 			   newk->k.appL.cont = k;
 			   
 			   k = newk;
@@ -230,9 +236,12 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				free(k);
 				k = newk;
 				state = INTERP;
+				debug("Finished applying k_binl continuation");
 			}
 			else if( k->type == K_BINR )
 			{
+				debug("Apply k_binr continuation");
+				
 				struct continuation *temp = k;
 				
 				if( k->k.binR.op == ADDITION )
@@ -302,7 +311,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 		}
 	}
 	free(k);
-	free_assoc_list( env );
+	//free_assoc_list( env );
 	
 	return val;
 

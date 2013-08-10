@@ -13,6 +13,7 @@ struct pair
 struct pair *push( char* sym, struct FRVal frv, struct pair *lst );
 struct pair *pop( struct pair *lst );
 struct pair *find( char* sym, struct pair *lst );
+struct pair *make_copy_env(struct pair *env);
 void free_assoc_list( struct pair *lst );
 
 #endif
