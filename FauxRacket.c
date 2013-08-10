@@ -185,7 +185,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 			else if( prog->type == FUN )
 			{
 				debug( "Interpret fun structure" );
-			   struct closure c = (struct closure){ .param = strdup(prog->e.f.id), .body = prog->e.f.body, .env = make_copy_env(env) };
+			   struct closure c = (struct closure){ .param = prog->e.f.id, .body = prog->e.f.body, .env = make_copy_env(env) };
 			   val = (struct FRVal){ .type = FR_FUNCTION, .v.clos = c };
 			   state = APPLY_CONT;
 			}
