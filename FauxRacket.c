@@ -302,7 +302,7 @@ struct FRVal interp_loop( struct exp *prog, struct pair *env )
 				debug( "Apply appR continuation" );
 				
 			   struct continuation *temp = k;
-			   env = push( k->k.appR.clos.param, val, env );
+			   env = push( k->k.appR.clos.param, val, k->k.appR.clos.env );
 			   prog = k->k.appR.clos.body;
 			   free(k);
 			   k = temp->k.appR.cont;
