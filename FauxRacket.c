@@ -22,7 +22,8 @@ struct exp *parse( struct node *prog )
 		struct exp *sublstParse = parse( prog->sublst );
 		
 		//(exp exp)
-		if( (sublstParse->type == FUN || sublstParse->type == SYM) && prog->rest != NULL )
+		if( ((sublstParse->type == FUN || sublstParse->type == APP) && prog->rest != NULL)
+		|| (sublstParse->type == SYM && prog->sublst->rest != NULL) )
 		{
 			//NOTE: this code is repeated later on
 			debug( "Parsing function application" );
@@ -30,7 +31,11 @@ struct exp *parse( struct node *prog )
 			check_mem(sexp);
 			
 			struct exp *func = sublstParse;
-			struct exp *arg = parse( prog->rest );
+			struct exp *arg;
+			if(sublstParse->type == SYM)
+				arg = parse( prog->sublst->rest );
+			else
+				arg = parse( prog->rest );
 			sexp->type = APP;
 			sexp->e.funApp = (struct app){ .func = func, .arg = arg };
 			return sexp;
