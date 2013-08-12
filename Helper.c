@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <ctype.h>
 
+extern FILE *input;
+
 /* peekchar: Take a look at the next character in stdin without removing it
  */
 int peekchar()
 {
-    return ungetc(getchar(), stdin);
+    return ungetc(getc(input), input);
 }
 
 /* skip_whitespace: Remove whitespace characters from the stdin until we
@@ -15,5 +17,5 @@ int peekchar()
 void skip_whitespace()
 {
 	while ( isspace( peekchar() ) )
-		getchar();
+		getc(input);
 }

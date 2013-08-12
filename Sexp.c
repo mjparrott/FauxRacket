@@ -11,13 +11,15 @@
 #include "Helper.h"
 #include "dbg.h"
 
+extern FILE *input;
+
 /* read_token: Read an S-expression token
  */
 struct token read_token()
 {
 	struct token t;
 	skip_whitespace();
-	int c = getchar();
+	int c = getc(input);
 	if( c == EOF )
 	{
 		t.tag = TEOF;
@@ -58,7 +60,7 @@ int read_nat( int c )
 	int ans = c - '0';
 	while( isdigit( peekchar() ) )
 	{
-		c = getchar();
+		c = getc(input);
 		ans = ans * 10 + c - '0';
 	}
 	return ans;
@@ -75,7 +77,7 @@ char *read_id( int c )
 		c = peekchar();
 		if( isalpha(c) || isdigit(c) )
 		{
-			buf[i] = getchar();
+			buf[i] = getc(input);
 		}
 		else
 		{
