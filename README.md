@@ -10,7 +10,9 @@ Instructions
 
 Compile the REPL with "make" and the resulting program (Repl)
 
-To run the tests, run "make tests" and then run "./RunTests.sh" inside the testing directory.
+To run a program from a file, run "./Repl filename"
+
+To run the tests, run "make" and then run "./RunTests.sh" while inside the main directory.
 
 Acknowledgements
 ================

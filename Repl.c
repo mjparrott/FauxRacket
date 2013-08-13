@@ -17,7 +17,8 @@ int main(int argc, char *argv[])
 	struct FRVal result;
 	struct exp *parsed;
 	
-	check(argc <= 3, "Too many command line arguments passed - accepts file as parameter or nothing.");
+	check(argc <= 3, "Too many command line arguments passed - accepts file as \
+		parameter as well as optional paramter to test against or nothing.");
 	if(argc >= 2)
 	{
 		//First argument is the filename to read a Faux Racket program from
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
 		prog = miread();
 		parsed = parse( prog );
 		result = interp_loop( parsed, NULL );
+		//TODO: free memory here
 		
 		if(argc == 3) //Second argument is output to test against
 		{
@@ -43,6 +45,7 @@ int main(int argc, char *argv[])
 				expectedOutput[strlen(expectedOutput)-1] = '\0';
 			
 			//NOTE: Temporarily assume that result of interpreted program is an integer
+			//Until other datatypes are added
 			char interpretedOutput[50];
 			sprintf(interpretedOutput, "%d", result.v.n);
 			
