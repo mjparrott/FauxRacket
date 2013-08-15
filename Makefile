@@ -25,3 +25,4 @@ AssociationList.o: AssociationList.c
 
 clean:
 	rm -rf *.o Repl
+	rm -rf Testing/*.log
